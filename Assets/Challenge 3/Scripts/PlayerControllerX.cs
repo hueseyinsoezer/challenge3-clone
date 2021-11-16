@@ -10,6 +10,9 @@ public class PlayerControllerX : MonoBehaviour
     private float gravityModifier = 1.5f;
     private Rigidbody playerRb;
 
+    private float boundY = 15.0f;
+    public bool IsGround = false;
+
     public ParticleSystem explosionParticle;
     public ParticleSystem fireworksParticle;
 
@@ -36,8 +39,24 @@ public class PlayerControllerX : MonoBehaviour
         // While space is pressed and player is low enough, float up
         if (Input.GetKey(KeyCode.Space) && !gameOver)
         {
-            playerRb.AddForce(Vector3.up * floatForce, ForceMode.Force);
+            
+            if (transform.position.y >= boundY)
+            {
+                transform.position = new Vector3(transform.position.x, boundY, transform.position.z);
+                playerRb.velocity = Vector3.zero;
+            }
+            else if (transform.position.y < boundY)
+            {
+                playerRb.AddForce(Vector3.up * floatForce, ForceMode.Force);
+            }
         }
+        else if (IsGround)
+        {
+            playerRb.AddForce(Vector3.up*floatForce/2, ForceMode.Impulse);
+            IsGround = false;
+        }
+
+
     }
 
     private void OnCollisionEnter(Collision other)
@@ -59,6 +78,10 @@ public class PlayerControllerX : MonoBehaviour
             playerAudio.PlayOneShot(moneySound, 1.0f);
             Destroy(other.gameObject);
 
+        }
+        else if (other.gameObject.CompareTag("Ground"))
+        {
+            IsGround = true;
         }
 
     }
